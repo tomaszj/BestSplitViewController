@@ -26,8 +26,15 @@
     
     BestSplitViewController *splitVC = [[BestSplitViewController alloc] init];
     
-    [splitVC setMasterViewController:[[MasterViewController alloc] initWithNibName:@"MasterViewController" bundle:nil]];
-    [splitVC setDetailViewController:[[DetailViewController alloc] initWithNibName:@"DetailViewController" bundle:nil]];
+    UIViewController *masterVC = [[MasterViewController alloc] initWithNibName:@"MasterViewController" bundle:nil];
+    UINavigationController *masterNavVC = [[UINavigationController alloc] initWithRootViewController:masterVC];
+    
+    [splitVC setMasterViewController:masterNavVC];
+    
+    UIViewController *detailVC = [[DetailViewController alloc] initWithNibName:@"DetailViewController" bundle:nil];
+    UINavigationController *detailNavVC = [[UINavigationController alloc] initWithRootViewController:detailVC];
+    
+    [splitVC setDetailViewController:detailNavVC];
     
     self.window.rootViewController = splitVC;
     [self.window makeKeyAndVisible];

@@ -15,6 +15,9 @@
     
     BOOL _masterShown;
     
+    BOOL _showsMasterInPortrait;
+    BOOL _showsMasterInLandscape;
+    
     UIPopoverController *_popoverController;
 }
 
@@ -22,11 +25,15 @@
 
 @implementation BestSplitViewController
 
+// Setup methods
+
 - (void)setup {
     _masterShown = YES;
     self.view.autoresizesSubviews = YES;
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 }
+
+// View lifecycle
 
 - (void)viewDidLoad {
     
@@ -56,6 +63,8 @@
     [self layoutViews];
 }
 
+// View layouting
+
 - (void)layoutViews {
     
     _masterViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight;
@@ -79,6 +88,18 @@
         [self.view sendSubviewToBack:_detailViewController.view];
     }
 }
+
+// Rotations
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+    [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
+    
+    if (_popoverController) {
+        [_popoverController dismissPopoverAnimated:NO];
+    }
+    
+}
+
+// Master view interactions
 
 - (void)hideMaster {
     
@@ -123,6 +144,8 @@
         }];
     }
 }
+
+// Master and Detail VC accessors
 
 - (UIViewController *)masterViewController {
     return _masterViewController;
@@ -200,7 +223,10 @@
         [_masterViewController removeFromParentViewController];
         
         UIPopoverController *popoverController = [[UIPopoverController alloc] initWithContentViewController:_masterViewController];
-        [popoverController setPopoverContentSize:CGSizeMake(320, 600)];
+        
+        float availableHeight = self.view.bounds.size.height - sender.frame.origin.y - sender.frame.size.height - 30;
+        
+        [popoverController setPopoverContentSize:CGSizeMake(320, availableHeight)];
         popoverController.delegate = self;
         
         [popoverController presentPopoverFromRect:sender.bounds inView:sender permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
