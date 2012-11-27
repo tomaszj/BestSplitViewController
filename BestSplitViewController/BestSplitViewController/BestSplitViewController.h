@@ -17,6 +17,6 @@
 
 @interface BestSplitViewController : UIViewController
 
-//@property (nonatomic, strong) IBOutlet UIViewController *masterViewController;
+@property (nonatomic, strong) IBOutlet UIViewController *masterViewController;
 
 @end

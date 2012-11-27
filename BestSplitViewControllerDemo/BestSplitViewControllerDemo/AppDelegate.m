@@ -10,6 +10,8 @@
 
 #import "BestSplitViewController.h"
 
+#import "MasterViewController.h"
+
 @implementation AppDelegate
 
 @synthesize managedObjectContext = _managedObjectContext;
@@ -20,7 +22,12 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
-    self.window.rootViewController = [[BestSplitViewController alloc] init];
+    
+    BestSplitViewController *splitVC = [[BestSplitViewController alloc] init];
+    
+    [splitVC setMasterViewController:[[MasterViewController alloc] initWithNibName:@"MasterViewController" bundle:nil]];
+    
+    self.window.rootViewController = splitVC;
     [self.window makeKeyAndVisible];
     return YES;
 }

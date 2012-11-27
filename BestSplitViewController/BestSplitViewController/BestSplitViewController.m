@@ -10,7 +10,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 @interface BestSplitViewController() {
-    UIView *_masterView;
+    UIViewController *_masterViewController;
     UIView *_detailView;
     
     BOOL _masterShown;
@@ -32,15 +32,10 @@
     
     [self setup];
     
-    _masterView = [[UIView alloc] initWithFrame:CGRectZero];
-    _masterView.backgroundColor = [UIColor orangeColor];
-    _masterView.autoresizingMask = UIViewAutoresizingFlexibleHeight; 
-    
     _detailView = [[UIView alloc] initWithFrame:CGRectZero];
     _detailView.backgroundColor = [UIColor blueColor];
     _detailView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     
-    [self.view addSubview:_masterView];
     [self.view addSubview:_detailView];
     
     UIButton *button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
@@ -63,10 +58,14 @@
     int masterWidth = 320;
     CGRect viewBounds = self.view.bounds;
 
-    _masterView.frame = CGRectMake(0, 0, masterWidth, viewBounds.size.height);
+    _masterViewController.view.frame = CGRectMake(0, 0, masterWidth, viewBounds.size.height);
     
     int detailWidth = viewBounds.size.width - masterWidth - 1;
     _detailView.frame = CGRectMake(masterWidth + 1, 0, detailWidth, viewBounds.size.height);
+    
+    if (!_masterViewController.view.superview) {
+        [self.view addSubview:_masterViewController.view];
+    }
 }
 
 - (void)hideMaster {
@@ -75,16 +74,16 @@
     
         _masterShown = NO;
         
-        CGRect masterFrame = _masterView.frame;
+        CGRect masterFrame = _masterViewController.view.frame;
         masterFrame.origin = CGPointMake(-masterFrame.size.width, 0);
         
         CGRect newDetailFrame = self.view.bounds;
         
         [UIView animateWithDuration:0.5 animations:^{
-            _masterView.frame = masterFrame;
+            _masterViewController.view.frame = masterFrame;
             _detailView.frame = newDetailFrame;
         } completion:^(BOOL finished) {
-            [_masterView removeFromSuperview];
+            [_masterViewController.view removeFromSuperview];
         }];
     }
 }
@@ -99,21 +98,47 @@
         CGRect viewBounds = self.view.bounds;
         CGRect offscreenFrame = CGRectMake(-masterWidth, 0, masterWidth, viewBounds.size.height);
         
-        _masterView.frame = offscreenFrame;
-        [self.view addSubview:_masterView];
+        _masterViewController.view.frame = offscreenFrame;
+        [self.view addSubview:_masterViewController.view];
         
         CGRect finalFrame = offscreenFrame;
         finalFrame.origin = CGPointMake(0.0, 0.0);
         
         [UIView animateWithDuration:0.5 animations:^{
-            _masterView.frame = finalFrame;
+            _masterViewController.view.frame = finalFrame;
         } completion:^(BOOL finished) {
             [self layoutViews];
         }];
     }
 }
 
-// ---
+- (UIViewController *)masterViewController {
+    return _masterViewController;
+}
+
+- (void)setMasterViewController:(UIViewController *)masterViewController {
+    
+    // Remove old view controller
+    UIViewController *oldViewController = _masterViewController;
+    [oldViewController willMoveToParentViewController:nil];
+    [oldViewController.view removeFromSuperview];
+    [oldViewController removeFromParentViewController];
+    
+    // Add new one
+    _masterViewController = masterViewController;
+    
+    [masterViewController willMoveToParentViewController:self];
+    [self addChildViewController:masterViewController];
+    [masterViewController didMoveToParentViewController:self];
+    
+    masterViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+    
+    
+    // Layout
+    [self layoutViews];
+}
+
+// --- Temporary methods
 
 - (void)hideMasterButtonTapped:(UIButton *)sender {
     if (_masterShown) {

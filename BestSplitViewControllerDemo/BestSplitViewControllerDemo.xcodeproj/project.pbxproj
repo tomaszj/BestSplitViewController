@@ -25,6 +25,8 @@
 		B35F7B25166541E900C2039E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B35F7B23166541E900C2039E /* InfoPlist.strings */; };
 		B35F7B28166541E900C2039E /* BestSplitViewControllerDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B35F7B27166541E900C2039E /* BestSplitViewControllerDemoTests.m */; };
 		B35F7B55166544CE00C2039E /* libBestSplitViewController.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B35F7B52166543AD00C2039E /* libBestSplitViewController.a */; };
+		B35F7B59166557BB00C2039E /* MasterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B35F7B57166557BB00C2039E /* MasterViewController.m */; };
+		B35F7B5A166557BB00C2039E /* MasterViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B35F7B58166557BB00C2039E /* MasterViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +76,9 @@
 		B35F7B26166541E900C2039E /* BestSplitViewControllerDemoTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BestSplitViewControllerDemoTests.h; sourceTree = "<group>"; };
 		B35F7B27166541E900C2039E /* BestSplitViewControllerDemoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BestSplitViewControllerDemoTests.m; sourceTree = "<group>"; };
 		B35F7B4D166543AC00C2039E /* BestSplitViewController.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BestSplitViewController.xcodeproj; path = ../BestSplitViewController/BestSplitViewController.xcodeproj; sourceTree = "<group>"; };
+		B35F7B56166557BB00C2039E /* MasterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MasterViewController.h; sourceTree = "<group>"; };
+		B35F7B57166557BB00C2039E /* MasterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MasterViewController.m; sourceTree = "<group>"; };
+		B35F7B58166557BB00C2039E /* MasterViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MasterViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,6 +147,9 @@
 				B35F7B08166541E900C2039E /* AppDelegate.m */,
 				B35F7B10166541E900C2039E /* BestSplitViewControllerDemo.xcdatamodeld */,
 				B35F7AFF166541E900C2039E /* Supporting Files */,
+				B35F7B56166557BB00C2039E /* MasterViewController.h */,
+				B35F7B57166557BB00C2039E /* MasterViewController.m */,
+				B35F7B58166557BB00C2039E /* MasterViewController.xib */,
 			);
 			path = BestSplitViewControllerDemo;
 			sourceTree = "<group>";
@@ -279,6 +287,7 @@
 				B35F7B0B166541E900C2039E /* Default.png in Resources */,
 				B35F7B0D166541E900C2039E /* Default@2x.png in Resources */,
 				B35F7B0F166541E900C2039E /* Default-568h@2x.png in Resources */,
+				B35F7B5A166557BB00C2039E /* MasterViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -316,6 +325,7 @@
 				B35F7B05166541E900C2039E /* main.m in Sources */,
 				B35F7B09166541E900C2039E /* AppDelegate.m in Sources */,
 				B35F7B12166541E900C2039E /* BestSplitViewControllerDemo.xcdatamodeld in Sources */,
+				B35F7B59166557BB00C2039E /* MasterViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
