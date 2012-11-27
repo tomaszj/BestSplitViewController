@@ -15,8 +15,9 @@
 
 @end
 
-@interface BestSplitViewController : UIViewController
+@interface BestSplitViewController : UIViewController <UIPopoverControllerDelegate>
 
 @property (nonatomic, strong) IBOutlet UIViewController *masterViewController;
+@property (nonatomic, strong) IBOutlet UIViewController *detailViewController;
 
 @end

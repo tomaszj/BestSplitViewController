@@ -11,9 +11,11 @@
 
 @interface BestSplitViewController() {
     UIViewController *_masterViewController;
-    UIView *_detailView;
+    UIViewController *_detailViewController;
     
     BOOL _masterShown;
+    
+    UIPopoverController *_popoverController;
 }
 
 @end
@@ -32,12 +34,6 @@
     
     [self setup];
     
-    _detailView = [[UIView alloc] initWithFrame:CGRectZero];
-    _detailView.backgroundColor = [UIColor blueColor];
-    _detailView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    
-    [self.view addSubview:_detailView];
-    
     UIButton *button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     button.frame = CGRectMake(0, 0, 161, 100);
     [button addTarget:self action:@selector(hideMasterButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
@@ -45,6 +41,13 @@
     button.center = self.view.center;
     
     [self.view addSubview:button];
+    
+    UIButton *showPopoverButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    showPopoverButton.frame = CGRectMake(400, 0, 161, 100);
+    [showPopoverButton addTarget:self action:@selector(showPopover:) forControlEvents:UIControlEventTouchUpInside];
+    showPopoverButton.titleLabel.text = @"Popover";
+
+    [self.view addSubview:showPopoverButton];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -55,16 +58,25 @@
 
 - (void)layoutViews {
     
+    _masterViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+    _detailViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    
     int masterWidth = 320;
     CGRect viewBounds = self.view.bounds;
 
     _masterViewController.view.frame = CGRectMake(0, 0, masterWidth, viewBounds.size.height);
     
     int detailWidth = viewBounds.size.width - masterWidth - 1;
-    _detailView.frame = CGRectMake(masterWidth + 1, 0, detailWidth, viewBounds.size.height);
+    _detailViewController.view.frame = CGRectMake(masterWidth + 1, 0, detailWidth, viewBounds.size.height);
     
     if (!_masterViewController.view.superview) {
         [self.view addSubview:_masterViewController.view];
+        [self.view sendSubviewToBack:_masterViewController.view];
+    }
+    
+    if (!_detailViewController.view.superview) {
+        [self.view addSubview:_detailViewController.view];
+        [self.view sendSubviewToBack:_detailViewController.view];
     }
 }
 
@@ -81,7 +93,7 @@
         
         [UIView animateWithDuration:0.5 animations:^{
             _masterViewController.view.frame = masterFrame;
-            _detailView.frame = newDetailFrame;
+            _detailViewController.view.frame = newDetailFrame;
         } completion:^(BOOL finished) {
             [_masterViewController.view removeFromSuperview];
         }];
@@ -138,6 +150,31 @@
     [self layoutViews];
 }
 
+- (UIViewController *)detailViewController {
+    return _detailViewController;
+}
+
+- (void)setDetailViewController:(UIViewController *)detailViewController {
+    // Remove old view controller
+    UIViewController *oldViewController = _detailViewController;
+    [oldViewController willMoveToParentViewController:nil];
+    [oldViewController.view removeFromSuperview];
+    [oldViewController removeFromParentViewController];
+    
+    // Add new one
+    _detailViewController = detailViewController;
+    
+    [detailViewController willMoveToParentViewController:self];
+    [self addChildViewController:detailViewController];
+    [detailViewController didMoveToParentViewController:self];
+    
+    detailViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    
+    // Layout
+    [self layoutViews];
+
+}
+
 // --- Temporary methods
 
 - (void)hideMasterButtonTapped:(UIButton *)sender {
@@ -145,6 +182,30 @@
         [self hideMaster];
     } else {
         [self showMaster];
+    }
+}
+
+- (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController {
+    [_masterViewController willMoveToParentViewController:self];
+    [self addChildViewController:_masterViewController];
+    [_masterViewController didMoveToParentViewController:self];
+    
+    _popoverController = nil;
+}
+
+- (void)showPopover:(UIButton *)sender {
+    if (!_masterViewController.view.superview) {
+
+        [_masterViewController willMoveToParentViewController:nil];
+        [_masterViewController removeFromParentViewController];
+        
+        UIPopoverController *popoverController = [[UIPopoverController alloc] initWithContentViewController:_masterViewController];
+        [popoverController setPopoverContentSize:CGSizeMake(320, 600)];
+        popoverController.delegate = self;
+        
+        [popoverController presentPopoverFromRect:sender.bounds inView:sender permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
+        
+        _popoverController = popoverController;
     }
 }
 

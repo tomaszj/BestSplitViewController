@@ -11,6 +11,7 @@
 #import "BestSplitViewController.h"
 
 #import "MasterViewController.h"
+#import "DetailViewController.h"
 
 @implementation AppDelegate
 
@@ -26,6 +27,7 @@
     BestSplitViewController *splitVC = [[BestSplitViewController alloc] init];
     
     [splitVC setMasterViewController:[[MasterViewController alloc] initWithNibName:@"MasterViewController" bundle:nil]];
+    [splitVC setDetailViewController:[[DetailViewController alloc] initWithNibName:@"DetailViewController" bundle:nil]];
     
     self.window.rootViewController = splitVC;
     [self.window makeKeyAndVisible];
