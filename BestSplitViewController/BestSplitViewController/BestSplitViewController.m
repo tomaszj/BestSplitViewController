@@ -57,21 +57,6 @@ const int masterWidth = 320;
     
     // Run setup
     [self setup];
-    
-    UIButton *button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    button.frame = CGRectMake(0, 0, 161, 100);
-    [button addTarget:self action:@selector(hideMasterButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-    button.titleLabel.text = @"Hide master";
-    button.center = self.view.center;
-    
-    [self.view addSubview:button];
-    
-    UIButton *defaultLayoutButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    defaultLayoutButton.frame = CGRectMake(0, 0, 161, 100);
-    [defaultLayoutButton addTarget:self action:@selector(setDefaultMasterVisibility) forControlEvents:UIControlEventTouchUpInside];
-    defaultLayoutButton.titleLabel.text = @"Default layout";
-    
-    [self.view addSubview:defaultLayoutButton];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -100,7 +85,7 @@ const int masterWidth = 320;
     
     // Set appropriate autoresizing masks to master and detail view
     if (!_isMasterInFullScreenMode) {
-        _masterViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+        _masterViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight;
     } else {
         _masterViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     }
@@ -208,7 +193,7 @@ const int masterWidth = 320;
     
     // Master was hidden, make sure that the delegate has received the suitable bar button item.
     if (!_popoverBarButtonItem) {
-        _popoverBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonItemStyleBordered target:self action:@selector(showPopover:)];
+        _popoverBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Master" style:UIBarButtonItemStyleBordered target:self action:@selector(showPopover:)];
         _popoverBarButtonItem.title = @"Master";
         
         [self.delegate bestSplitViewController:self willHideViewController:_masterViewController withBarButtonItem:_popoverBarButtonItem forPopoverController:nil];
@@ -322,11 +307,41 @@ const int masterWidth = 320;
     [self layoutViews];
 }
 
+- (BOOL)isDisplayingMasterViewInFullScreenMode {
+    return _isMasterInFullScreenMode;
+}
+
 - (void)setDefaultMasterVisibility {
     _showsMasterInLandscape = YES;
     _showsMasterInPortrait = NO;
     
     [self layoutViews];
+}
+
+- (void)toggleMasterView {
+    UIInterfaceOrientation currentOrientation = [UIApplication sharedApplication].statusBarOrientation;
+    
+    if (_masterShown) {
+        [self hideMaster:YES];
+        
+        if (UIInterfaceOrientationIsPortrait(currentOrientation)) {
+            _showsMasterInPortrait = NO;
+        } else {
+            _showsMasterInLandscape = NO;
+        }
+    } else {
+        [self showMaster:YES];
+        
+        if (UIInterfaceOrientationIsPortrait(currentOrientation)) {
+            _showsMasterInPortrait = YES;
+        } else {
+            _showsMasterInLandscape = YES;
+        }
+    }
+}
+
+- (BOOL)isShowingTheMasterViewInLeftSplit {
+    return _masterShown;
 }
 
 #pragma mark - Popover handling
@@ -360,31 +375,6 @@ const int masterWidth = 320;
 - (void)dismissPopover {
     if (_popoverController) {
         [_popoverController dismissPopoverAnimated:NO];
-    }
-}
-
-// --- Temporary methods
-
-- (void)hideMasterButtonTapped:(UIButton *)sender {
-    
-    UIInterfaceOrientation currentOrientation = [UIApplication sharedApplication].statusBarOrientation;
-    
-    if (_masterShown) {
-        [self hideMaster:YES];
-        
-        if (UIInterfaceOrientationIsPortrait(currentOrientation)) {
-            _showsMasterInPortrait = NO;
-        } else {
-            _showsMasterInLandscape = NO;
-        }
-    } else {
-        [self showMaster:YES];
-        
-        if (UIInterfaceOrientationIsPortrait(currentOrientation)) {
-            _showsMasterInPortrait = YES;
-        } else {
-            _showsMasterInLandscape = YES;
-        }
     }
 }
 

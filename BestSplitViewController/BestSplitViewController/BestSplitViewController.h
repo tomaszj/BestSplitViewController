@@ -39,6 +39,25 @@
 - (void)setDisplayMasterViewInFullScreenMode:(BOOL)isFullScreen;
 
 /**
+ * Indicates if it's displaying the master view in full screen mode.
+ *
+ * @return YES if it's displaying in full screen
+ */
+- (BOOL)isDisplayingMasterViewInFullScreenMode;
+
+/**
+ * Toggles the master view.
+ */
+- (void)toggleMasterView;
+
+/**
+ * Checks if the master view is displayed in the left pane.
+ *
+ * @return YES if it's true.
+ */
+- (BOOL)isShowingTheMasterViewInLeftSplit;
+
+/**
  * Sets default layout settings (master hidden in portrait mode and shown in landscape).
  */
 - (void)setDefaultMasterVisibility;

@@ -7,6 +7,8 @@
 //
 
 #import "MasterViewController.h"
+#import "AppDelegate.h"
+#import "BestSplitViewController.h"
 
 @interface MasterViewController ()
 
@@ -28,6 +30,35 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
+    
+    UIBarButtonItem *fullScreenButton = [[UIBarButtonItem alloc] initWithTitle:@"Full screen" style:UIBarButtonItemStyleBordered target:self action:@selector(switchToFullScreen)];
+    
+    self.navigationItem.rightBarButtonItem = fullScreenButton;
+}
+
+- (void)switchToFullScreen {
+    [self switchToFullScreen:YES];
+}
+
+- (void)switchFromFullScreen {
+    [self switchToFullScreen:NO];
+}
+
+- (void)switchToFullScreen:(BOOL)isFullScreen {
+    UIBarButtonItem *fullScreenButton;
+    
+    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+    BestSplitViewController *splitVC = appDelegate.splitViewController;
+    
+    [splitVC setDisplayMasterViewInFullScreenMode:isFullScreen];
+    
+    if (isFullScreen) {
+        fullScreenButton = [[UIBarButtonItem alloc] initWithTitle:@"Switch Back" style:UIBarButtonItemStyleBordered target:self action:@selector(switchFromFullScreen)];
+    } else {
+        fullScreenButton = [[UIBarButtonItem alloc] initWithTitle:@"Full screen" style:UIBarButtonItemStyleBordered target:self  action:@selector(switchToFullScreen)];
+    }
+    
+    [self.navigationItem setRightBarButtonItem:fullScreenButton animated:YES];
 }
 
 - (void)didReceiveMemoryWarning

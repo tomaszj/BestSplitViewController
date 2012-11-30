@@ -18,28 +18,29 @@
 @synthesize managedObjectContext = _managedObjectContext;
 @synthesize managedObjectModel = _managedObjectModel;
 @synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
+@synthesize splitViewController = _splitViewController;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     
-    BestSplitViewController *splitVC = [[BestSplitViewController alloc] init];
+    _splitViewController = [[BestSplitViewController alloc] init];
     
     UIViewController *masterVC = [[MasterViewController alloc] initWithNibName:@"MasterViewController" bundle:nil];
     UINavigationController *masterNavVC = [[UINavigationController alloc] initWithRootViewController:masterVC];
     UITabBarController *tabBarVC = [[UITabBarController alloc] init];
     tabBarVC.viewControllers = [NSArray arrayWithObject:masterNavVC];
     
-    [splitVC setMasterViewController:tabBarVC];
+    [_splitViewController setMasterViewController:tabBarVC];
     
     DetailViewController *detailVC = [[DetailViewController alloc] initWithNibName:@"DetailViewController" bundle:nil];
-    splitVC.delegate = detailVC;
+    _splitViewController.delegate = detailVC;
     UINavigationController *detailNavVC = [[UINavigationController alloc] initWithRootViewController:detailVC];
     
-    [splitVC setDetailViewController:detailNavVC];
+    [_splitViewController setDetailViewController:detailNavVC];
     
-    self.window.rootViewController = splitVC;
+    self.window.rootViewController = _splitViewController;
     [self.window makeKeyAndVisible];
     return YES;
 }
