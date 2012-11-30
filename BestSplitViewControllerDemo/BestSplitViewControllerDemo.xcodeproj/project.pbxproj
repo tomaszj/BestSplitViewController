@@ -511,6 +511,7 @@
 				B35F7B2D166541E900C2039E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B35F7B2E166541E900C2039E /* Build configuration list for PBXNativeTarget "BestSplitViewControllerDemoTests" */ = {
 			isa = XCConfigurationList;
@@ -519,6 +520,7 @@
 				B35F7B30166541E900C2039E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 

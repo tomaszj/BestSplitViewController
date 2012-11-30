@@ -28,10 +28,13 @@
     
     UIViewController *masterVC = [[MasterViewController alloc] initWithNibName:@"MasterViewController" bundle:nil];
     UINavigationController *masterNavVC = [[UINavigationController alloc] initWithRootViewController:masterVC];
+    UITabBarController *tabBarVC = [[UITabBarController alloc] init];
+    tabBarVC.viewControllers = [NSArray arrayWithObject:masterNavVC];
     
-    [splitVC setMasterViewController:masterNavVC];
+    [splitVC setMasterViewController:tabBarVC];
     
-    UIViewController *detailVC = [[DetailViewController alloc] initWithNibName:@"DetailViewController" bundle:nil];
+    DetailViewController *detailVC = [[DetailViewController alloc] initWithNibName:@"DetailViewController" bundle:nil];
+    splitVC.delegate = detailVC;
     UINavigationController *detailNavVC = [[UINavigationController alloc] initWithRootViewController:detailVC];
     
     [splitVC setDetailViewController:detailNavVC];

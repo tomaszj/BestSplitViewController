@@ -35,4 +35,12 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)bestSplitViewController:(BestSplitViewController *)svc willHideViewController:(UIViewController *)aViewController withBarButtonItem:(UIBarButtonItem *)barButtonItem forPopoverController:(UIPopoverController *)pc {
+    [toolbar setItems:[NSArray arrayWithObject:barButtonItem] animated:YES];
+}
+
+- (void)bestSplitViewController:(BestSplitViewController *)svc willShowViewController:(UIViewController *)aViewController invalidatingBarButtonItem:(UIBarButtonItem *)button {
+    [toolbar setItems:[NSArray array] animated:YES];
+}
+
 @end

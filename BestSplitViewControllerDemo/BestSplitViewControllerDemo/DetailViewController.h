@@ -7,7 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "BestSplitViewController.h"
 
-@interface DetailViewController : UIViewController
+@interface DetailViewController : UIViewController <BestSplitViewControllerDelegate> {
+    
+    __weak IBOutlet UIToolbar *toolbar;
+}
 
 @end
