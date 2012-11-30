@@ -9,6 +9,9 @@
 #import "BestSplitViewController.h"
 #import <QuartzCore/QuartzCore.h>
 
+/** Master View width. */
+const int masterWidth = 320;
+
 @interface BestSplitViewController() {
     UIViewController *_masterViewController;
     UIViewController *_detailViewController;
@@ -29,23 +32,27 @@
 
 @synthesize delegate = _delegate;
 
-// Setup methods
-
+#pragma mark - Setup methods
 - (void)setup {
+    
+    // By default, master view is shown
     _masterShown = YES;
+    
+    // Allow autoresizing of subviews
     self.view.autoresizesSubviews = YES;
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
+    // Set default settings
     _showsMasterInPortrait = NO;
     _showsMasterInLandscape = YES;
 }
 
-// View lifecycle
-
+#pragma mark - View lifecycle
 - (void)viewDidLoad {
     
     [super viewDidLoad];
     
+    // Run setup
     [self setup];
     
     UIButton *button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
@@ -55,61 +62,65 @@
     button.center = self.view.center;
     
     [self.view addSubview:button];
+    
+    UIButton *defaultLayoutButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    defaultLayoutButton.frame = CGRectMake(0, 0, 161, 100);
+    [defaultLayoutButton addTarget:self action:@selector(setDefaultMasterVisibility) forControlEvents:UIControlEventTouchUpInside];
+    defaultLayoutButton.titleLabel.text = @"Hide master";
+    
+    [self.view addSubview:defaultLayoutButton];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    [self layoutViewsAtStart];
+    // Layout the views before appearing
+    [self layoutViewsWithoutAnimation];
 }
 
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    
-    [self layoutViewsAtStart];
-}
-
-// View layouting
+#pragma mark - View layouting
 - (void)layoutViews {
+    // By default, layout using status bar orientation and animation
     [self layoutViewsForInterfaceOrientation:[UIApplication sharedApplication].statusBarOrientation animated:YES];
 }
 
-- (void)layoutViewsAtStart {
+- (void)layoutViewsWithoutAnimation {
     [self layoutViewsForInterfaceOrientation:[UIApplication sharedApplication].statusBarOrientation animated:NO];
 }
 
 - (void)layoutViewsForInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation animated:(BOOL)animated {
 
+    // Make sure that master view controller and detail view controller are present
     if (!_masterViewController || !_detailViewController) {
         return;
     }
     
+    // Set appropriate autoresizing masks to master and detail view
     _masterViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight;
     _detailViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
 
-    // Set the standard width
-    int masterWidth = 320;
     CGRect viewBounds = self.view.bounds;
     
-    // Check the interface orientation
+    // Check if should display master in this interface orientation
     if ((_showsMasterInPortrait && UIInterfaceOrientationIsPortrait(interfaceOrientation)) || (_showsMasterInLandscape && UIInterfaceOrientationIsLandscape(interfaceOrientation))) {
             
-        // Should show the master
+        // Should show the master - add it to the view hierarchy
         _masterViewController.view.frame = CGRectMake(0, 0, masterWidth, viewBounds.size.height);
         
-         // Add the master view to the split view if not set
+        // Add the master view to the split view if not set
         if (!_masterViewController.view.superview) {
             [self.view addSubview:_masterViewController.view];
             [self.view sendSubviewToBack:_masterViewController.view];
             _masterShown = YES;
         }
         
-        // Set the detail view accordingly
+        // Set the detail view accordingly in the remaining space
         int detailWidth = viewBounds.size.width - masterWidth - 1;
         _detailViewController.view.frame = CGRectMake(masterWidth + 1, 0, detailWidth, viewBounds.size.height);
         
-        // Hide the popover view controller
+        // Hide the popover view controller if the button is present
         if (_popoverBarButtonItem) {
+            // Notify the delegate, dismiss and tidy up
             [self.delegate bestSplitViewController:self willShowViewController:_masterViewController invalidatingBarButtonItem:_popoverBarButtonItem];
             
             [self dismissPopover];
@@ -118,14 +129,16 @@
 
     } else {
         
-        // Master should be hidden
+        // Master should be hidden if it's present
         if (_masterShown) {
             [self hideMaster:NO];
         }
         
+        // Fill the screen with detail view
         _detailViewController.view.frame = viewBounds;
     }
     
+    // If the detail view isn't in the view hierarchy - add it.
     if (!_detailViewController.view.superview) {
         [self.view addSubview:_detailViewController.view];
         [self.view sendSubviewToBack:_detailViewController.view];
@@ -133,28 +146,33 @@
 
 }
 
-// Rotations
+#pragma mark - Rotation events
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
     [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
-    
+
+    // Dismiss popover on rotations
     if (_popoverController) {
         [_popoverController dismissPopoverAnimated:NO];
     }
     
+    // Layout views in the new orientation
     [self layoutViewsForInterfaceOrientation:toInterfaceOrientation animated:NO];
 }
 
-// Master view interactions
+#pragma mark - Master view interactions
 
 - (void)hideMaster:(BOOL)animated {
     
+    // Hide only if it was previously shown
     if (_masterShown) {
     
         _masterShown = NO;
         
+        // Calculate the offscreen target frame
         CGRect masterFrame = _masterViewController.view.frame;
         masterFrame.origin = CGPointMake(-masterFrame.size.width, 0);
         
+        // Resize the detail view
         CGRect newDetailFrame = self.view.bounds;
         
         // Define operations for animations
@@ -167,6 +185,7 @@
             [_masterViewController.view removeFromSuperview];
         };
         
+        // Run!
         if (animated) {
             [UIView animateWithDuration:0.5 animations:mainBlock completion:completionBlock];
         } else {
@@ -186,20 +205,21 @@
 
 - (void)showMaster:(BOOL)animated {
 
+    // Show only if it was hidden
     if (!_masterShown) {
         
         _masterShown = YES;
         
-        int masterWidth = 320;
+        // Calculate the starting, offscreen frame
         CGRect viewBounds = self.view.bounds;
         CGRect offscreenFrame = CGRectMake(-masterWidth, 0, masterWidth, viewBounds.size.height);
         
         _masterViewController.view.frame = offscreenFrame;
-        [self.view addSubview:_masterViewController.view];
+        [self.view insertSubview:_masterViewController.view aboveSubview:_detailViewController.view];
         
+        // Calculate the final frame
         CGRect finalFrame = offscreenFrame;
         finalFrame.origin = CGPointMake(0.0, 0.0);
-        
         
         // Define operations for animations
         void(^mainBlock)() = ^{
@@ -211,6 +231,7 @@
             
         };
         
+        // Run!
         if (animated) {
             [UIView animateWithDuration:0.5 animations:mainBlock completion:completionBlock];
         } else {
@@ -220,7 +241,7 @@
     }
 }
 
-// Master and Detail VC accessors
+#pragma mark - Master and Detail VC accessors
 - (UIViewController *)masterViewController {
     return _masterViewController;
 }
@@ -245,7 +266,7 @@
     
     // Layout
     if (self.isViewLoaded) {
-        [self layoutViewsAtStart];
+        [self layoutViewsWithoutAnimation];
     }
 }
 
@@ -271,12 +292,49 @@
     
     // Layout
     if (self.isViewLoaded) {
-        [self layoutViewsAtStart];
+        [self layoutViewsWithoutAnimation];
     }
 }
 
 - (void)setDefaultMasterVisibility {
+    _showsMasterInLandscape = YES;
+    _showsMasterInPortrait = NO;
     
+    [self layoutViews];
+}
+
+#pragma mark - Popover handling
+- (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController {
+    [_masterViewController willMoveToParentViewController:self];
+    [self addChildViewController:_masterViewController];
+    [_masterViewController didMoveToParentViewController:self];
+    
+    _popoverController = nil;
+}
+
+- (void)showPopover:(UIBarButtonItem *)sender {
+    if (!_masterViewController.view.superview) {
+        
+        [_masterViewController willMoveToParentViewController:nil];
+        [_masterViewController removeFromParentViewController];
+        
+        UIPopoverController *popoverController = [[UIPopoverController alloc] initWithContentViewController:_masterViewController];
+        
+        float availableHeight = self.view.bounds.size.height;
+        
+        popoverController.popoverContentSize = CGSizeMake(320, availableHeight);
+        popoverController.delegate = self;
+        
+        [popoverController presentPopoverFromBarButtonItem:sender permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
+        
+        _popoverController = popoverController;
+    }
+}
+
+- (void)dismissPopover {
+    if (_popoverController) {
+        [_popoverController dismissPopoverAnimated:NO];
+    }
 }
 
 // --- Temporary methods
@@ -301,39 +359,6 @@
         } else {
             _showsMasterInLandscape = YES;
         }
-    }
-}
-
-- (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController {
-    [_masterViewController willMoveToParentViewController:self];
-    [self addChildViewController:_masterViewController];
-    [_masterViewController didMoveToParentViewController:self];
-    
-    _popoverController = nil;
-}
-
-- (void)showPopover:(UIBarButtonItem *)sender {
-    if (!_masterViewController.view.superview) {
-
-        [_masterViewController willMoveToParentViewController:nil];
-        [_masterViewController removeFromParentViewController];
-        
-        UIPopoverController *popoverController = [[UIPopoverController alloc] initWithContentViewController:_masterViewController];
-        
-        float availableHeight = self.view.bounds.size.height;
-        
-        popoverController.popoverContentSize = CGSizeMake(320, availableHeight);
-        popoverController.delegate = self;
-        
-        [popoverController presentPopoverFromBarButtonItem:sender permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
-        
-        _popoverController = popoverController;
-    }
-}
-
-- (void)dismissPopover {
-    if (_popoverController) {
-        [_popoverController dismissPopoverAnimated:NO];
     }
 }
 

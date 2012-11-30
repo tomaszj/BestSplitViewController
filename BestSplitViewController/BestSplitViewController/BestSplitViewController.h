@@ -11,6 +11,9 @@
 
 @class BestSplitViewController;
 
+/**
+ * Delegate to BestSplitViewController class, responds to events allowing popover handling.
+ */
 @protocol BestSplitViewControllerDelegate <NSObject>
 
 - (void)bestSplitViewController:(BestSplitViewController *)svc willHideViewController:(UIViewController *)aViewController withBarButtonItem:(UIBarButtonItem *)barButtonItem forPopoverController:(UIPopoverController *)pc;
@@ -19,12 +22,18 @@
 
 @end
 
+/**
+ * Split View Controller based on parent-child relationships and ARC.
+ */
 @interface BestSplitViewController : UIViewController <UIPopoverControllerDelegate>
 
 @property (nonatomic, strong) IBOutlet UIViewController *masterViewController;
 @property (nonatomic, strong) IBOutlet UIViewController *detailViewController;
 @property (nonatomic, weak) IBOutlet id<BestSplitViewControllerDelegate> delegate;
 
+/**
+ * Sets default layout settings (master hidden in portrait mode and shown in landscape).
+ */
 - (void)setDefaultMasterVisibility;
 
 @end
