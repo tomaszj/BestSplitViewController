@@ -32,6 +32,13 @@
 @property (nonatomic, weak) IBOutlet id<BestSplitViewControllerDelegate> delegate;
 
 /**
+ * Sets the displaying of the master view in either full screen or normal mode.
+ *
+ * @param isFullScreen indicating if should be shown in full screen
+ */
+- (void)setDisplayMasterViewInFullScreenMode:(BOOL)isFullScreen;
+
+/**
  * Sets default layout settings (master hidden in portrait mode and shown in landscape).
  */
 - (void)setDefaultMasterVisibility;

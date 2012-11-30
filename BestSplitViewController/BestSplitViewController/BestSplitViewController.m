@@ -16,6 +16,7 @@ const int masterWidth = 320;
     UIViewController *_masterViewController;
     UIViewController *_detailViewController;
     
+    BOOL _isMasterInFullScreenMode;
     BOOL _masterShown;
     
     BOOL _showsMasterInPortrait;
@@ -37,6 +38,8 @@ const int masterWidth = 320;
     
     // By default, master view is shown
     _masterShown = YES;
+    
+    _isMasterInFullScreenMode = NO;
     
     // Allow autoresizing of subviews
     self.view.autoresizesSubviews = YES;
@@ -66,7 +69,7 @@ const int masterWidth = 320;
     UIButton *defaultLayoutButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     defaultLayoutButton.frame = CGRectMake(0, 0, 161, 100);
     [defaultLayoutButton addTarget:self action:@selector(setDefaultMasterVisibility) forControlEvents:UIControlEventTouchUpInside];
-    defaultLayoutButton.titleLabel.text = @"Hide master";
+    defaultLayoutButton.titleLabel.text = @"Default layout";
     
     [self.view addSubview:defaultLayoutButton];
 }
@@ -96,7 +99,11 @@ const int masterWidth = 320;
     }
     
     // Set appropriate autoresizing masks to master and detail view
-    _masterViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+    if (!_isMasterInFullScreenMode) {
+        _masterViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    } else {
+        _masterViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    }
     _detailViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
 
     CGRect viewBounds = self.view.bounds;
@@ -105,12 +112,17 @@ const int masterWidth = 320;
     if ((_showsMasterInPortrait && UIInterfaceOrientationIsPortrait(interfaceOrientation)) || (_showsMasterInLandscape && UIInterfaceOrientationIsLandscape(interfaceOrientation))) {
             
         // Should show the master - add it to the view hierarchy
-        _masterViewController.view.frame = CGRectMake(0, 0, masterWidth, viewBounds.size.height);
+        if (!_isMasterInFullScreenMode) {
+            // Normal left split frame
+            _masterViewController.view.frame = CGRectMake(0, 0, masterWidth, viewBounds.size.height);
+        } else {
+            // Full screen frame
+            _masterViewController.view.frame = CGRectMake(0, 0, viewBounds.size.width, viewBounds.size.height);
+        }
         
         // Add the master view to the split view if not set
         if (!_masterViewController.view.superview) {
-            [self.view addSubview:_masterViewController.view];
-            [self.view sendSubviewToBack:_masterViewController.view];
+            [self.view insertSubview:_masterViewController.view aboveSubview:_detailViewController.view];
             _masterShown = YES;
         }
         
@@ -210,16 +222,24 @@ const int masterWidth = 320;
         
         _masterShown = YES;
         
+        CGRect viewBounds, offscreenFrame, finalFrame;
+        viewBounds = self.view.bounds;
+        
         // Calculate the starting, offscreen frame
-        CGRect viewBounds = self.view.bounds;
-        CGRect offscreenFrame = CGRectMake(-masterWidth, 0, masterWidth, viewBounds.size.height);
+        if (!_isMasterInFullScreenMode) {
+            // Left split
+            offscreenFrame = CGRectMake(-masterWidth, 0, masterWidth, viewBounds.size.height);
+        } else {
+            // Full screen
+            offscreenFrame = CGRectMake(-viewBounds.size.width, 0, viewBounds.size.width, viewBounds.size.height);
+        }
+        
+        // Calculate the final frame
+        finalFrame = offscreenFrame;
+        finalFrame.origin = CGPointMake(0.0, 0.0);
         
         _masterViewController.view.frame = offscreenFrame;
         [self.view insertSubview:_masterViewController.view aboveSubview:_detailViewController.view];
-        
-        // Calculate the final frame
-        CGRect finalFrame = offscreenFrame;
-        finalFrame.origin = CGPointMake(0.0, 0.0);
         
         // Define operations for animations
         void(^mainBlock)() = ^{
@@ -294,6 +314,12 @@ const int masterWidth = 320;
     if (self.isViewLoaded) {
         [self layoutViewsWithoutAnimation];
     }
+}
+
+- (void)setDisplayMasterViewInFullScreenMode:(BOOL)isFullScreen {
+    _isMasterInFullScreenMode = isFullScreen;
+    
+    [self layoutViews];
 }
 
 - (void)setDefaultMasterVisibility {
