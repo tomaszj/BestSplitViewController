@@ -96,6 +96,16 @@ const int masterWidth = 320;
     // Check if should display master in this interface orientation
     if ((_showsMasterInPortrait && UIInterfaceOrientationIsPortrait(interfaceOrientation)) || (_showsMasterInLandscape && UIInterfaceOrientationIsLandscape(interfaceOrientation))) {
             
+        // Hide the popover view controller if the button is present
+        if (_popoverBarButtonItem || _popoverController.isPopoverVisible) {
+            
+            // Notify the delegate, dismiss and tidy up
+            [self.delegate bestSplitViewController:self willShowViewController:_masterViewController invalidatingBarButtonItem:_popoverBarButtonItem];
+            
+            [self dismissPopover];
+            _popoverBarButtonItem = nil;
+        }
+        
         // Should show the master - add it to the view hierarchy
         if (!_isMasterInFullScreenMode) {
             // Normal left split frame
@@ -106,7 +116,7 @@ const int masterWidth = 320;
         }
         
         // Add the master view to the split view if not set
-        if (!_masterViewController.view.superview) {
+        if (_masterViewController.view.superview != self.view) {
             [self.view insertSubview:_masterViewController.view aboveSubview:_detailViewController.view];
             _masterShown = YES;
         }
@@ -114,15 +124,6 @@ const int masterWidth = 320;
         // Set the detail view accordingly in the remaining space
         int detailWidth = viewBounds.size.width - masterWidth - 1;
         _detailViewController.view.frame = CGRectMake(masterWidth + 1, 0, detailWidth, viewBounds.size.height);
-        
-        // Hide the popover view controller if the button is present
-        if (_popoverBarButtonItem) {
-            // Notify the delegate, dismiss and tidy up
-            [self.delegate bestSplitViewController:self willShowViewController:_masterViewController invalidatingBarButtonItem:_popoverBarButtonItem];
-            
-            [self dismissPopover];
-            _popoverBarButtonItem = nil;
-        }
 
     } else {
         
@@ -145,12 +146,9 @@ const int masterWidth = 320;
 
 #pragma mark - Rotation events
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
-    [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
 
     // Dismiss popover on rotations
-    if (_popoverController) {
-        [_popoverController dismissPopoverAnimated:NO];
-    }
+    [self dismissPopover];
     
     // Layout views in the new orientation
     [self layoutViewsForInterfaceOrientation:toInterfaceOrientation animated:NO];
@@ -346,15 +344,11 @@ const int masterWidth = 320;
 
 #pragma mark - Popover handling
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController {
-    [_masterViewController willMoveToParentViewController:self];
-    [self addChildViewController:_masterViewController];
-    [_masterViewController didMoveToParentViewController:self];
     
-    _popoverController = nil;
 }
 
 - (void)showPopover:(UIBarButtonItem *)sender {
-    if (!_masterViewController.view.superview) {
+    if (!_masterViewController.view.superview || !_popoverController.isPopoverVisible) {
         
         [_masterViewController willMoveToParentViewController:nil];
         [_masterViewController removeFromParentViewController];
@@ -366,15 +360,22 @@ const int masterWidth = 320;
         popoverController.popoverContentSize = CGSizeMake(320, availableHeight);
         popoverController.delegate = self;
         
-        [popoverController presentPopoverFromBarButtonItem:sender permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
+        [popoverController presentPopoverFromBarButtonItem:sender permittedArrowDirections:UIPopoverArrowDirectionUp | UIPopoverArrowDirectionDown animated:YES];
         
         _popoverController = popoverController;
+        
     }
 }
 
 - (void)dismissPopover {
     if (_popoverController) {
         [_popoverController dismissPopoverAnimated:NO];
+        
+        [_masterViewController willMoveToParentViewController:self];
+        [self addChildViewController:_masterViewController];
+        [_masterViewController didMoveToParentViewController:self];
+        
+        _popoverController = nil;
     }
 }
 
